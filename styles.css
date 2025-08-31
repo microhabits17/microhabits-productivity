@@ -1,0 +1,101 @@
+/* ============= Base ============= */
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --paper: #ffffff;
+  --brand: #111827;
+  --soft: rgba(255,255,255,.6);
+  --ring: rgba(17,24,39,.15);
+  --good: #16a34a;
+  --locked: #cbd5e1;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  color: var(--ink);
+  background: #f8fafc;
+}
+.bg-layer {
+  position: fixed; inset: 0;
+  background: url('assets/background.png') center/cover no-repeat;
+  opacity: 0.35;
+  filter: saturate(1.05) blur(0.2px);
+  pointer-events: none;
+}
+
+/* ============= Topbar ============= */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: .6rem 1rem;
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,.65);
+  border-bottom: 1px solid rgba(255,255,255,.4);
+}
+.topbar-center { display: flex; justify-content: center; }
+.logo { height: 36px; width: auto; object-fit: contain; }
+.days-nav { display: flex; gap: .4rem; justify-self: end; }
+.days-nav .day-btn {
+  padding: .4rem .6rem; border-radius: 999px; border: 1px solid var(--ring);
+  background: var(--paper); font-weight: 600; font-size: .9rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+}
+.day-btn.locked { color: var(--locked); cursor: not-allowed; }
+.day-btn.active { outline: 2px solid var(--brand); }
+
+/* ============= Layout ============= */
+.container { width: min(1000px, 92%); margin: 1.2rem auto 4rem; }
+.day-title h1 { margin: .6rem 0 .2rem; font-size: clamp(1.2rem, 2vw + 1rem, 1.8rem); }
+.subtitle { color: var(--muted); margin: 0 0 1rem; }
+
+/* ============= Timer ============= */
+.timer-wrap { display: grid; place-items: center; gap: 1rem; margin: 1rem 0 2rem; }
+.timer-circle { position: relative; width: 260px; height: 260px; }
+.timer-circle svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.track { fill: none; stroke: #e2e8f0; stroke-width: 12; }
+.progress { fill: none; stroke: #0ea5e9; stroke-width: 12; stroke-linecap: round; stroke-dasharray: 339.292; stroke-dashoffset: 339.292; transition: stroke-dashoffset .2s ease; }
+.time { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; }
+.timer-controls { display: flex; gap: .6rem; }
+.btn { padding: .6rem .9rem; border-radius: 10px; border: 1px solid var(--ring); background: var(--paper); cursor: pointer; }
+.btn.primary { background: #111827; color: white; }
+.note { margin: .2rem 0; color: var(--muted); font-size: .9rem; }
+.congrats { background: rgba(255,255,255,.8); border: 1px solid rgba(0,0,0,.08); padding: 1rem; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.06); }
+.hidden { display: none !important; }
+
+/* ============= Cards ============= */
+.section-title { font-size: 1.2rem; margin: 1.2rem 0 .6rem; }
+.cards.scroller { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); gap: .8rem; overflow-x: auto; padding-bottom: .3rem; }
+.cards.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: .8rem; }
+.card {
+  background: rgba(255,255,255,.9); border: 1px solid rgba(0,0,0,.06);
+  border-radius: 16px; padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.05);
+}
+.card h3 { margin-top: 0; font-size: 1rem; }
+.muted { color: var(--muted); font-size: .9rem; }
+
+/* ============= Onboarding ============= */
+.onboarding {
+  position: fixed; inset: 0; background: rgba(0,0,0,.25);
+  display: grid; place-items: center;
+}
+.onboarding-card {
+  width: min(720px, 94%); background: white; border-radius: 16px; padding: 1.2rem 1.4rem;
+  box-shadow: 0 30px 80px rgba(0,0,0,.25);
+}
+.onboarding-card h2 { margin-top: 0; }
+.onboarding.hidden { display: none; }
+
+/* ============= Footer ============= */
+.footer { text-align: center; color: var(--muted); margin-top: 2rem; }
+
+/* ============= Modal ============= */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 50; }
+.modal.hidden { display: none !important; }
+.modal-card { width: min(560px, 92%); background: rgba(255,255,255,.96); border-radius: 16px; padding: 1rem 1.2rem; box-shadow: 0 30px 80px rgba(0,0,0,.25); }
+.modal-close { position: absolute; right: 14px; top: 10px; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.stack { display: grid; gap: .6rem; margin-top: .6rem; }
+.modal-card h3 { margin: .2rem 0 .2rem; }
+.modal-card .muted { margin-top: .2rem; }
