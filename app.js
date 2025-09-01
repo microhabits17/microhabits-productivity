@@ -114,22 +114,26 @@ const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxSIwJiQlPc2n4N-ws
 async function sendEmailToEndpoint(email) {
   if (!ENDPOINT_URL) return { ok: false, skipped: true };
   try {
-    const res = await fetch(ENDPOINT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source: "microhabits-productivity",
-        email,
-        day: currentDay,
-        timestamp: new Date().toISOString()
-      }),
+    const payload = new URLSearchParams({
+      source: "microhabits-productivity",
+      email,
+      day: String(currentDay),
+      timestamp: new Date().toISOString()
     });
-    return { ok: res.ok };
+    // no-cors: invio “silenzioso” per evitare CORS/preflight con Apps Script
+    await fetch(ENDPOINT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: payload
+    });
+    // Non possiamo leggere la risposta in no-cors, ma la richiesta parte e Apps Script la registra
+    return { ok: true, opaque: true };
   } catch (e) {
     console.warn("Email send failed:", e);
     return { ok: false, error: String(e) };
   }
 }
+
 
 // ======= App State & Persistence =======
 const LS_KEY = "microhabits_prod_progress";
@@ -318,16 +322,17 @@ els.reset.addEventListener("click", resetTimer);
 
 // email form
 els.emailForm.addEventListener("submit", (e)=>{
-  e.preventDefault();
-  const email = els.emailInput.value.trim();
-  if (email) {
-    state.email = email;
-    saveState(state);
-    sendEmailToEndpoint(email).then(r => {
-      els.emailSaved.textContent = r && r.ok ? "Saved and sent. We’ll keep you posted." : "Saved locally. Network send skipped/failed.";
-      els.emailSaved.classList.remove("hidden");
-    });
-  }
+ e.preventDefault();
+const email = els.emailInput.value.trim();
+if (email) {
+  state.email = email;
+  saveState(state);
+  sendEmailToEndpoint(email).then(() => {
+    els.emailSaved.textContent = "Saved and sent. We’ll keep you posted.";
+    els.emailSaved.classList.remove("hidden");
+  });
+}
+
 });
 
 
@@ -337,18 +342,19 @@ els.earlyEmailClose.addEventListener("click", closeEarlyEmail);
 
 els.earlyEmailForm.addEventListener("submit", (e)=>{
   e.preventDefault();
-  const email = els.earlyEmailInput.value.trim();
-  if (email) {
-    state.email = email;
-    const d = state.days[String(currentDay)];
-    d.emailPrompted = true;
-    saveState(state);
-    sendEmailToEndpoint(email).then(r => {
-      els.earlyEmailSaved.textContent = r && r.ok ? "Saved and sent. Thanks!" : "Saved locally. Network send skipped/failed.";
-      els.earlyEmailSaved.classList.remove("hidden");
-      setTimeout(closeEarlyEmail, 1000);
-    });
-  }
+const email = els.earlyEmailInput.value.trim();
+if (email) {
+  state.email = email;
+  const d = state.days[String(currentDay)];
+  d.emailPrompted = true;
+  saveState(state);
+  sendEmailToEndpoint(email).then(() => {
+    els.earlyEmailSaved.textContent = "Saved and sent. Thanks!";
+    els.earlyEmailSaved.classList.remove("hidden");
+    setTimeout(closeEarlyEmail, 1000);
+  });
+}
+
 });
 
 function maybePromptEarlyEmail(){
