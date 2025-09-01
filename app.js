@@ -1,4 +1,22 @@
 // ======= Data: 7 days content (from the main PDF, distilled) =======
+const GOOGLE_FORM_URL = "https://forms.gle/IL_TUO_LINK"; // ← incolla qui il link al tuo Google Form
+const ENDPOINT_URL = ""; // lascialo vuoto per disattivare la fetch a Apps Script
+// ---- Helper: apri form o mailto ----
+function openFormForEmail(email) {
+  if (GOOGLE_FORM_URL && GOOGLE_FORM_URL.startsWith("http")) {
+    window.open(GOOGLE_FORM_URL, "_blank", "noopener");
+    return true;
+  } else {
+    const subject = encodeURIComponent("MicroHabits – 7-Day Productivity: notify me");
+    const body = encodeURIComponent(
+      "Please add me to the MicroHabits updates list.\n\nEmail: " + (email || "") +
+      "\nDay: " + (typeof currentDay !== "undefined" ? currentDay : "") + "\n"
+    );
+    window.location.href = "mailto:micro.habits17@gmail.com?subject=" + subject + "&body=" + body;
+    return true;
+  }
+}
+
 const DAYS = [
   {
     title: "Day 1 • Declutter & Eliminate Distractions",
@@ -322,16 +340,18 @@ els.reset.addEventListener("click", resetTimer);
 
 // email form
 els.emailForm.addEventListener("submit", (e)=>{
- e.preventDefault();
-const email = els.emailInput.value.trim();
-if (email) {
-  state.email = email;
-  saveState(state);
-  sendEmailToEndpoint(email).then(() => {
-    els.emailSaved.textContent = "Saved and sent. We’ll keep you posted.";
+ els.emailForm.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const email = els.emailInput.value.trim();
+  if (email) {
+    state.email = email;
+    saveState(state);
+    openFormForEmail(email); // ← apre il Google Form in nuova scheda
+    els.emailSaved.textContent = "Saved. Form opened in a new tab.";
     els.emailSaved.classList.remove("hidden");
-  });
-}
+  }
+});
+
 
 });
 
@@ -341,19 +361,21 @@ function closeEarlyEmail(){ els.earlyEmail.classList.add("hidden"); els.earlyEma
 els.earlyEmailClose.addEventListener("click", closeEarlyEmail);
 
 els.earlyEmailForm.addEventListener("submit", (e)=>{
+  els.earlyEmailForm.addEventListener("submit", (e)=>{
   e.preventDefault();
-const email = els.earlyEmailInput.value.trim();
-if (email) {
-  state.email = email;
-  const d = state.days[String(currentDay)];
-  d.emailPrompted = true;
-  saveState(state);
-  sendEmailToEndpoint(email).then(() => {
-    els.earlyEmailSaved.textContent = "Saved and sent. Thanks!";
+  const email = els.earlyEmailInput.value.trim();
+  if (email) {
+    state.email = email;
+    const d = state.days[String(currentDay)];
+    d.emailPrompted = true;
+    saveState(state);
+    openFormForEmail(email); // ← apre il Google Form in nuova scheda
+    els.earlyEmailSaved.textContent = "Saved. Form opened in a new tab.";
     els.earlyEmailSaved.classList.remove("hidden");
     setTimeout(closeEarlyEmail, 1000);
-  });
-}
+  }
+});
+
 
 });
 
