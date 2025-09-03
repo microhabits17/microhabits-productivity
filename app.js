@@ -377,3 +377,39 @@ function maybePromptEarlyEmail(){
 updateUnlocksByTime();
 renderNav();
 switchDay(currentDay);
+
+// === CONFIG ===
+const ENDPOINT = 'https://script.google.com/macros/s/XXXXXXXX/exec'; // <-- tuo /exec
+
+async function sendLeadImpl({ email, day, source }) {
+  const body = new URLSearchParams({
+    email: email || '',
+    day: day || '',
+    source: source || '10min-form',
+    timestamp: new Date().toISOString()
+  });
+  await fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', body });
+}
+
+// Espone globalmente (serve per poterla chiamare dalla console e da altri script)
+window.sendLead = sendLeadImpl;
+globalThis.sendLead = sendLeadImpl;
+
+// (opzionale) collega anche il form se esiste già in DOM
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('tenMinForm');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = form.email?.value?.trim() || '';
+    const day = form.dataset.day || window.currentDay || '';
+    form.querySelector('button[type="submit"]')?.setAttribute('disabled', 'true');
+    try {
+      await sendLead({ email, day, source: '10min-form' });
+      alert('Inviato ✅');
+    } finally {
+      form.querySelector('button[type="submit"]')?.removeAttribute('disabled');
+      form.reset();
+    }
+  });
+});
