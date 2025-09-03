@@ -107,29 +107,42 @@ const DAYS = [
 ];
 
 
-// ======= Email collection to a webhook (Google Apps Script / Formspree / Make, etc.) =======
-// Set this to your endpoint URL (leave "" to disable network send and save only locally)
-const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxSIwJiQlPc2n4N-wsRpXBXr6X2O-XlTnXmTi5DGYaIUi77XszA0wG8S6SQH0L6pivttA/exec"; // e.g. "https://script.google.com/macros/s/AKfycbx.../exec" or "https://formspree.io/f/xxxx"
+// === CONFIG ===
+const ENDPOINT = 'https://script.google.com/macros/s/XXXXXXXX/exec'; // <-- il tuo /exec
 
-async function sendEmailToEndpoint(email) {
-  if (!ENDPOINT_URL) return { ok: false, skipped: true };
-  try {
-    const res = await fetch(ENDPOINT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source: "microhabits-productivity",
-        email,
-        day: currentDay,
-        timestamp: new Date().toISOString()
-      }),
-    });
-    return { ok: res.ok };
-  } catch (e) {
-    console.warn("Email send failed:", e);
-    return { ok: false, error: String(e) };
-  }
+// Invia al foglio: usa x-www-form-urlencoded + no-cors
+async function sendLead({ email, day, source }) {
+  const body = new URLSearchParams({
+    email: email || '',
+    day: day || '',
+    source: source || '10min-form',
+    timestamp: new Date().toISOString()
+  });
+  await fetch(ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',   // niente preflight, niente CORS error
+    body               // niente headers custom!
+  });
 }
+
+// ESEMPIO: quando invii il form che compare a 10 minuti
+document.getElementById('tenMinForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const email = form.email?.value?.trim() || '';
+  const day = form.dataset.day || window.currentDay || '';
+  form.querySelector('button[type="submit"]')?.setAttribute('disabled', 'true');
+  try {
+    await sendLead({ email, day, source: '10min-form' });
+    // Non possiamo leggere la risposta (è "opaque"), ma la riga viene scritta.
+    // Mostra solo un messaggio lato UI:
+    (window.showToast?.('Inviato ✅')) ?? alert('Inviato ✅');
+  } finally {
+    form.querySelector('button[type="submit"]')?.removeAttribute('disabled');
+    form.reset();
+  }
+});
+
 
 // ======= App State & Persistence =======
 const LS_KEY = "microhabits_prod_progress";
